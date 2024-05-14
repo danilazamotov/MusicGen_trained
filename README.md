@@ -9,11 +9,11 @@ Installing audiocraft
 
 Google colab example in terminal
 
-cd /content/drive/MyDrive/audiocraft_training
-git clone https://github.com/GrandaddyShmax/audiocraft_plus.git
-cd audiocraft_plus
-apt install python3.10-venv
-python -m venv venv
+- cd /content/drive/MyDrive/audiocraft_training
+- git clone https://github.com/GrandaddyShmax/audiocraft_plus.git
+- cd audiocraft_plus
+- apt install python3.10-venv
+- python -m venv venv
 source venv/bin/activate
 pip install -e .
 python3 -m pip install setuptools wheel
