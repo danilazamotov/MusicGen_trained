@@ -9,29 +9,33 @@ Installing audiocraft
 
 Google colab example in terminal
 
-- cd /content/drive/MyDrive/audiocraft_training
-- git clone https://github.com/GrandaddyShmax/audiocraft_plus.git
-- cd audiocraft_plus
-- apt install python3.10-venv
-- python -m venv venv
-- source venv/bin/activate
-- pip install -e .
-- python3 -m pip install setuptools wheel
-- sudo apt-get update
-- sudo apt-get install sox libsox-dev libsox-fmt-all
-- sudo apt-get install libopenblas-base libopenblas-dev
-- sudo apt-get install ffmpeg
-- pip install transformers --upgrade
-- pip install  torchmetrics --upgrade
-- pip install -U torchaudio
-- pip uninstall xformers
-- pip install xformers
+```jsx
+cd /content/drive/MyDrive/audiocraft_training
+git clone https://github.com/GrandaddyShmax/audiocraft_plus.git
+cd audiocraft_plus
+apt install python3.10-venv
+python -m venv venv
+source venv/bin/activate
+pip install -e .
+python3 -m pip install setuptools wheel
+sudo apt-get update
+sudo apt-get install sox libsox-dev libsox-fmt-all
+sudo apt-get install libopenblas-base libopenblas-dev
+sudo apt-get install ffmpeg
+pip install transformers --upgrade
+pip install  torchmetrics --upgrade
+pip install -U torchaudio
+pip uninstall xformers
+pip install xformers
+```
 
 # Dataset
 - Use .ipynb dataset processing to split audio into chunks
 # Creating manifest files
-- python -m audiocraft.data.audio_dataset dataset/example egs/example/data.jsonl
 
+```jsx
+python -m audiocraft.data.audio_dataset dataset/example egs/example/data.jsonl
+```
 # Config
 
 /config/teams
