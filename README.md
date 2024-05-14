@@ -26,3 +26,6 @@ Google colab example in terminal
 - pip install -U torchaudio
 - pip uninstall xformers
 - pip install xformers
+
+# dataset
+Use .ipynb dataset processing to split audio into chunks
