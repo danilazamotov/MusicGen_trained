@@ -27,5 +27,25 @@ Google colab example in terminal
 - pip uninstall xformers
 - pip install xformers
 
-# dataset
-Use .ipynb dataset processing to split audio into chunks
+# Dataset
+- Use .ipynb dataset processing to split audio into chunks
+# Creating manifest files
+- python -m audiocraft.data.audio_dataset dataset/example egs/example/data.jsonl
+
+# Config
+
+/config/teams
+```jsx
+default:
+  dora_dir: /mnt/audiocraft_${oc.env:USER} / полный путь, где будут сохраняться чекпоинты
+  partitions:
+    global: debug # Уровень дебагинга, / info
+    team: debug
+  reference_dir: /mnt
+darwin:  # if we detect we are on a Mac, then most likely we are doing unit testing etc.
+  dora_dir: /tmp/audiocraft_${oc.env:USER}
+  partitions:
+    global: debug
+    team: debug
+  reference_dir: /tmp
+```
