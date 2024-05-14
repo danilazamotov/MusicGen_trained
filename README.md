@@ -60,9 +60,7 @@ darwin:  # if we detect we are on a Mac, then most likely we are doing unit test
 defaults:
   - musicgen/default
   - /model: lm/musicgen_lm
-  # - override /dset: audio/default
-  - override /dset: audio/example
-  #- override /model/lm/model_scale: medium
+  - override /dset: audio/default
   - _self_
 
 autocast: true
@@ -81,57 +79,29 @@ deadlock:
   use: true  # deadlock detection
 
 dataset:
-  batch_size: 8  # 32 GPUs  Для RTX 4090, но лучше 1-4
+  batch_size: 4 #64  # 32 GPUs
   sample_on_weight: false  # Uniform sampling all the way
+  num_workers: 10
+  shuffle: true
+  segment_duration: 15
+  min_segment_ratio: 0.8
   sample_on_duration: false  # Uniform sampling all the way
-  num_workers: 20 # Вроде как зависит от процессора
-  
+    
 generate:
-  every: 25
-  num_workers: 20
-  path: samples
-  audio:
-    format: wav
-    strategy: loudness
-    sample_rate: ${sample_rate}
-    loudness_headroom_db: 14
   lm:
-    prompted_samples: true
-    unprompted_samples: true
-    gen_gt_samples: false
-    prompt_duration: null
-    gen_duration: null
-    remove_prompts: false
     use_sampling: true
-    temp: 1.0
     top_k: 250
-    top_p: 0.1
-
-# optim:
-#   epochs: 100
-#   oprimazer: adamw
-#   max_norm: 0.5
-#   lr: 1
-#   ema:
-#     use: true
-#     updates: 10
-#     device: cuda
+    top_p: 0.0
 
 optim:
   epochs: 200
-  updates_per_epoch: 2000
+  updates_per_epoch: 1000
   lr: 1e-4
   optimizer: adamw
-  max_norm: 1.0
-  eager_sync: true
   adam:
     betas: [0.9, 0.95]
-    weight_decay: 0.1
+    weight_decay: 0.01
     eps: 1e-8
-  ema:
-    use: true
-    updates: 10
-    device: cuda
 
 logging:
   log_tensorboard: true
@@ -139,13 +109,42 @@ logging:
 schedule:
   lr_scheduler: cosine
   cosine:
-    warmup: 3000
+    warmup: 1000
     lr_min_ratio: 0.0
     cycle_length: 1.0
 
 checkpoint:
   save_last: true
-  save_every: 20
-  keep_last: 10
+  save_every: 10
+  keep_last: 2
   keep_every_states: null
+```
+
+# bash  dora start!
+```jsx
+echo "Starting TensorBoard..." >> run.log
+tensorboard --logdir=/mnt/checkpoint_audiocraft_trained/audiocraft_user/xps/ --port=50500 --bind_all >> run.log 2>&1 &
+echo "TensorBoard is running at [http://localhost:50500](http://localhost:50500/)" >> run.log
+
+echo "Running Dora..." >> run.log
+export USER=user
+export XFORMERS_MORE_DETAILS=1
+export HYDRA_FULL_ERROR=1
+export TF_ENABLE_ONEDNN_OPTS=0
+export OC_CAUSE=1
+export PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:128
+dora --verbose run dset=audio/example \
+solver=musicgen/musicgen_base_32khz \
+model/lm/model_scale=small \
+continue_from=//pretrained/facebook/musicgen-small
+conditioner=text2music \
+evaluate.metrics.chroma_cosine=true >> run.log 2>&1
+echo "Dora process finished." >> run.log
+
+echo "Deactivating environment..." >> run.log
+deactivate >> run.log
+echo "Environment deactivated." >> run.log
+
+kill $!  # Убиваем последний фоновый процесс (TensorBoard)
+echo "TensorBoard has been stopped." >> run.log
 ```
