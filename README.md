@@ -14,18 +14,15 @@ Google colab example in terminal
 - cd audiocraft_plus
 - apt install python3.10-venv
 - python -m venv venv
-source venv/bin/activate
-pip install -e .
-python3 -m pip install setuptools wheel
-sudo apt-get update
-sudo apt-get install sox libsox-dev libsox-fmt-all
-sudo apt-get install libopenblas-base libopenblas-dev
-
-# if GPU
-# pip install torch==2.1.0+cu121 -f https://download.pytorch.org/whl/torch_stable.html not need
-sudo apt-get install ffmpeg
-pip install transformers --upgrade
-pip install  torchmetrics --upgrade
-pip install -U torchaudio
-pip uninstall xformers
-pip install xformers
+- source venv/bin/activate
+- pip install -e .
+- python3 -m pip install setuptools wheel
+- sudo apt-get update
+- sudo apt-get install sox libsox-dev libsox-fmt-all
+- sudo apt-get install libopenblas-base libopenblas-dev
+- sudo apt-get install ffmpeg
+- pip install transformers --upgrade
+- pip install  torchmetrics --upgrade
+- pip install -U torchaudio
+- pip uninstall xformers
+- pip install xformers
