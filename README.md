@@ -152,3 +152,66 @@ echo "Environment deactivated." >> run.log
 kill $!  # Убиваем последний фоновый процесс (TensorBoard)
 echo "TensorBoard has been stopped." >> run.log
 ```
+
+# Correct files 
+
+I've had some bugs, my opinion is what needs to be changed
+/audiocraft/data/audio_utils.py
+
+```jsx
+def i16_pcm(wav: torch.Tensor) -> torch.Tensor:
+    """Convert audio to int 16 bits PCM format.
+
+    ..Warning:: There exist many formula for doing this conversion. None are perfect
+    due to the asymmetry of the int16 range. One either have possible clipping, DC offset,
+    or inconsistencies with f32_pcm. If the given wav doesn't have enough headroom,
+    it is possible that `i16_pcm(f32_pcm)) != Identity`.
+    """
+    if wav.dtype.is_floating_point:
+        max_val = wav.abs().max()
+        if max_val > 1:
+            wav = wav / max_val  # Normalize to range [-1, 1]
+        candidate = (wav * 2 ** 15).round()
+        if candidate.max() >= 2 ** 15:  # clipping would occur
+            candidate = (wav * (2 ** 15 - 1)).round()
+        return candidate.short()
+    else:
+        assert wav.dtype == torch.int16
+        return wav
+```
+/audiocraft/app.py
+- 914
+```jsx
+ if MODEL.max_duration is None:
+        print("MODEL.max_duration is not initialized or is None")
+    if overlap is None:
+        print("overlap is not initialized or is None")
+        
+    extend_stride = MODEL.max_duration - overlap if MODEL.max_duration and overlap else 0
+
+    outs, outs_audio, outs_backup, input_length = _do_predictions(
+        gen_type, [texts], [melody], sample, trim_start, trim_end, duration, image, height, width, background, bar1, bar2, channel, sr_select, progress=True,
+        top_k=topk, top_p=topp, temperature=temperature, cfg_coef=cfg_coef, extend_stride=extend_stride)
+    tags = [str(global_prompt), str(bpm), str(key), str(scale), str(raw_texts), str(duration), str(overlap), str(seed), str(audio_mode), str(input_length), str(channel), str(sr_select), str(model_shrt), str(custom_model_shrt), str(decoder), str(topk), str(topp), str(temperature), str(cfg_coef), str(gen_type)]
+    wav_target, mp4_target, json_target = save_outputs(outs[0], outs_audio[0], tags, gen_type);
+```
+
+audiocraft_plus\audiocraft\models\musicgen.py
+```jsx
+def __init__(self, name: str, compression_model: CompressionModel, lm: LMModel,
+                 max_duration: tp.Optional[float] = None):
+        self.name = name
+        self.compression_model = compression_model
+        self.lm = lm
+        if max_duration is None:
+            if hasattr(lm, 'cfg'):
+                max_duration = lm.cfg.dataset.segment_duration  # type: ignore
+            else:
+                raise ValueError("You must provide max_duration when building directly MusicGen")
+
+        self.max_duration: float = 30
+```
+
+```jsx
+#assert extend_stride < self.max_duration, "Cannot stride by more than max generation duration."
+```
